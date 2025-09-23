@@ -1,0 +1,6 @@
+dist/* usr/lib/node_modules/mbgl-renderer/dist/
+node_modules/* usr/lib/node_modules/mbgl-renderer/node_modules/
+package.json usr/lib/node_modules/mbgl-renderer/
+README.md usr/share/doc/mbgl-renderer/
+LICENSE usr/share/doc/mbgl-renderer/
+CHANGES.md usr/share/doc/mbgl-renderer/

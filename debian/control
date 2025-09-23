@@ -1,0 +1,22 @@
+Source: mbgl-renderer
+Section: utils
+Priority: optional
+Maintainer: Conservation Biology Institute <info@consbio.org>
+Build-Depends: debhelper (>= 11), cmake (>= 3.16), nodejs (>= 18), npm
+Standards-Version: 4.5.0
+Homepage: https://github.com/consbio/mbgl-renderer
+
+Package: mbgl-renderer
+Architecture: any
+Depends: ${misc:Depends}, nodejs (>= 18), npm
+Description: Static Map Renderer using MapLibre GL
+ Create static map images using MapLibre GL with a command-line interface,
+ an HTTP interface, and a NodeJS API.
+ .
+ Features:
+ - Render static maps using NodeJS with maplibre-gl-native
+ - Supports raster and vector tiles
+ - Compatible with Mapbox tiles and other hosted tile providers
+ - Use locally hosted mbtiles
+ - Add GeoJSON overlays to your maps
+ - Supports high DPI rendering

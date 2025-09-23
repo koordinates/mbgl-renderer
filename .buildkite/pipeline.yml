@@ -1,0 +1,45 @@
+---
+steps:
+  - group: ":debian: Build & Package"
+    key: build
+    steps:
+      - label: "build package ({{matrix.arch}})"
+        command: ".buildkite/build.sh"
+        artifact_paths:
+          - "build/*.deb"
+        agents:
+          queue: default_{{matrix.arch}}
+        plugins:
+          - docker#v5.10.0:
+              image: "${ECR}/jammybuild:master-{{matrix.arch}}.latest"
+              environment:
+                - BUILDKITE_BUILD_NUMBER
+        matrix:
+          setup:
+            arch:
+              - amd64
+              - arm64
+
+  - label: ":debian: Publish deb"
+    depends_on: 
+      - build
+    command:
+      - >
+        aptly-upload
+        --aptly-url https://apt-repo.kx.gd
+        --retries 3
+        --repo kx-builds-jammy
+        --series jammy
+        build/*.deb
+    retry:
+      automatic: true
+    plugins:
+      artifacts#v1.9.3:
+        download: "build/*.deb"
+      docker#v5.10.0:
+        image: "${ECR}/ci-tools"
+        always-pull: true
+        workdir: /src
+        environment:
+          - APTLY_UNAME
+          - APTLY_PASSWD

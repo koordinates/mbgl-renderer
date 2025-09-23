@@ -1,0 +1,8 @@
+mbgl-renderer (0.9.0-1) jammy; urgency=medium
+
+  * Initial Debian package release
+  * Static Map Renderer using MapLibre GL
+  * Added CMake build system for packaging
+  * Includes CLI tools: mbgl-render and mbgl-server
+
+ -- Conservation Biology Institute <info@consbio.org>  Mon, 23 Sep 2025 12:00:00 +0000
