@@ -21,6 +21,16 @@ const validateDimension = (value) => {
     }
 }
 
+const parseHeader = (headerStr, previous) => {
+    const headers = previous || {}
+    const [name, ...valueParts] = headerStr.split(':')
+    if (!name || valueParts.length === 0) {
+        throw new InvalidArgumentError(`Invalid header format: ${header}`)
+    }
+    headers[name.trim()] = valueParts.join(':').trim()
+    return headers
+}
+
 program
     .version(version)
     .name('mbgl-render')
@@ -37,6 +47,11 @@ program
     .argument('<image>', 'output image filename')
     .argument('<width>', 'image width', validateDimension)
     .argument('<height>', 'image height', validateDimension)
+    .option(
+        '-H, --header <headers...>',
+        'Add custom headers to outgoing requests',
+        parseHeader,
+    )
     .option(
         '-c, --center <longitude,latitude>',
         'center of map (NO SPACES)',
@@ -70,6 +85,7 @@ program
 const [styleFilename, imgFilename, width, height] = program.args
 
 const {
+    header = null,
     center = null,
     zoom = null,
     ratio = 1,
@@ -82,6 +98,8 @@ const {
     images: imagesFilename = null,
 } = program.opts()
 
+// used later by getRemoteAsset()
+globalThis._kxCustomHTTPHeaders = header;
 const imgWidth = parseInt(width, 10)
 const imgHeight = parseInt(height, 10)
 
@@ -217,8 +235,12 @@ if (isMapboxStyle) {
 
     // load the style then call the render function
     const styleURL = normalizeMapboxStyleURL(styleFilename, token)
+    const reqOpts = {
+        url: styleURL,
+        headers: headers,
+    }
     console.log(`requesting mapbox style:${styleFilename}\nfrom: ${styleURL}`)
-    webRequest(styleURL, (err, res, body) => {
+    webRequest(reqOpts, (err, res, body) => {
         if (err) {
             return raiseError(err)
         }
