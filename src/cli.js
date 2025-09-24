@@ -31,6 +31,10 @@ const parseHeader = (headerStr, previous) => {
     return headers
 }
 
+const isURL = (url) => {
+    return url.startsWith('http://') || url.startsWith('https://')
+}
+
 program
     .version(version)
     .name('mbgl-render')
@@ -40,6 +44,9 @@ program
     )
     .argument('<style>', 'style JSON', (styleFilename) => {
         const isMapboxStyle = isMapboxStyleURL(styleFilename)
+        if (isURL(styleFilename)) {
+            return styleFilename
+        }
         if (!(isMapboxStyle || fs.existsSync(styleFilename))) {
             throw new InvalidArgumentError('File does not exist')
         }
@@ -83,6 +90,7 @@ program
     .parse()
 
 const [styleFilename, imgFilename, width, height] = program.args
+
 
 const {
     header = null,
@@ -228,18 +236,24 @@ const renderRequest = (style) => {
         })
 }
 
+let styleURL = null
 if (isMapboxStyle) {
     if (!token) {
         raiseError('mapbox access token is required')
     }
 
     // load the style then call the render function
-    const styleURL = normalizeMapboxStyleURL(styleFilename, token)
+    styleURL = normalizeMapboxStyleURL(styleFilename, token)
+} else if (isURL(styleFilename)) {
+    styleURL = styleFilename
+}
+if (styleURL) {
+    // read styleJSON from URL
     const reqOpts = {
         url: styleURL,
-        headers: headers,
+        headers: header,
     }
-    console.log(`requesting mapbox style:${styleFilename}\nfrom: ${styleURL}`)
+    console.log(`requesting mapbox style:${styleURL}\nfrom: ${styleURL}`)
     webRequest(reqOpts, (err, res, body) => {
         if (err) {
             return raiseError(err)
@@ -249,18 +263,14 @@ if (isMapboxStyle) {
             case 200: {
                 return renderRequest(JSON.parse(body))
             }
-            case 401: {
-                return raiseError(
-                    'Mapbox token is not authorized for this style'
-                )
-            }
             default: {
                 return raiseError(
-                    `Unexpected response for mapbox style request: ${styleURL}\n${res.statusCode}`
+                    `Unexpected response for style request: ${styleURL}\n${res.statusCode}`
                 )
             }
         }
     })
+
 } else {
     // read styleJSON
     fs.readFile(styleFilename, (err, data) => {
