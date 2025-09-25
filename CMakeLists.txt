@@ -17,7 +17,7 @@ else()
 endif()
 
 # Debian-specific settings
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "nodejs (>= 18), npm")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "nodejs (>= 18), npm, libopengl0, libuv1, xvfb")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${DEB_ARCH}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
