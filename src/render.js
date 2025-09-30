@@ -291,12 +291,16 @@ const getLocalTile = (tilePath, url, callback) => {
  * @param {function} callback - callback to call with (err, {data})
  */
 const getRemoteTile = (url, callback) => {
+    const req = {
+        url,
+        encoding: null,
+        gzip: true,
+    };
+    if (globalThis._kxMBGLCustomHTTPHeaders) {
+        req.headers = globalThis._kxMBGLCustomHTTPHeaders;
+    }
     webRequest(
-        {
-            url,
-            encoding: null,
-            gzip: true,
-        },
+        req,
         (err, res, data) => {
             if (err) {
                 return callback(err)
@@ -337,12 +341,16 @@ const getRemoteTile = (url, callback) => {
  * @param {function} callback - callback to call with (err, {data})
  */
 const getRemoteAsset = (url, callback) => {
+    const req = {
+        url,
+        encoding: null,
+        gzip: true,
+    };
+    if (globalThis._kxMBGLCustomHTTPHeaders) {
+        req.headers = globalThis._kxMBGLCustomHTTPHeaders;
+    }
     webRequest(
-        {
-            url,
-            encoding: null,
-            gzip: true,
-        },
+        req,
         (err, res, data) => {
             if (err) {
                 return callback(err)
