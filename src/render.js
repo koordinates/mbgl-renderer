@@ -598,6 +598,10 @@ const toPNG = async (buffer, width, height, ratio) => {
         .toBuffer()
 }
 
+const isURL = (url) => {
+    return typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))
+}
+
 /**
  * Asynchronously render a map using Mapbox GL, based on layers specified in style.
  * Returns PNG image data (via async / Promise).
@@ -706,6 +710,10 @@ export const render = async (style, width = 1024, height = 1024, options) => {
     // present in tilePath and that tilePath is not null
     if (tilePath) {
         tilePath = path.normalize(tilePath)
+    }
+    if (isURL(style)) {
+        let respContent = (await getRemoteAssetPromise(style)).data
+        style = JSON.parse(respContent)
     }
 
     const localMbtilesMatches = JSON.stringify(style).match(MBTILES_REGEXP)

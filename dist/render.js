@@ -313,11 +313,15 @@ var getLocalTile = function getLocalTile(tilePath, url, callback) {
  * @param {function} callback - callback to call with (err, {data})
  */
 var getRemoteTile = function getRemoteTile(url, callback) {
-  (0, _request["default"])({
+  var req = {
     url: url,
     encoding: null,
     gzip: true
-  }, function (err, res, data) {
+  };
+  if (globalThis._kxMBGLCustomHTTPHeaders) {
+    req.headers = globalThis._kxMBGLCustomHTTPHeaders;
+  }
+  (0, _request["default"])(req, function (err, res, data) {
     if (err) {
       return callback(err);
     }
@@ -361,11 +365,15 @@ var getRemoteTile = function getRemoteTile(url, callback) {
  * @param {function} callback - callback to call with (err, {data})
  */
 var getRemoteAsset = function getRemoteAsset(url, callback) {
-  (0, _request["default"])({
+  var req = {
     url: url,
     encoding: null,
     gzip: true
-  }, function (err, res, data) {
+  };
+  if (globalThis._kxMBGLCustomHTTPHeaders) {
+    req.headers = globalThis._kxMBGLCustomHTTPHeaders;
+  }
+  (0, _request["default"])(req, function (err, res, data) {
     if (err) {
       return callback(err);
     }
@@ -676,6 +684,9 @@ var toPNG = /*#__PURE__*/function () {
     return _ref6.apply(this, arguments);
   };
 }();
+var isURL = function isURL(url) {
+  return typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
+};
 
 /**
  * Asynchronously render a map using Mapbox GL, based on layers specified in style.
@@ -727,6 +738,7 @@ var render = exports.render = /*#__PURE__*/function () {
       _msg0,
       _msg1,
       viewport,
+      respContent,
       localMbtilesMatches,
       _msg10,
       map,
@@ -845,14 +857,24 @@ var render = exports.render = /*#__PURE__*/function () {
           if (tilePath) {
             tilePath = _path["default"].normalize(tilePath);
           }
+          if (!isURL(style)) {
+            _context5.next = 46;
+            break;
+          }
+          _context5.next = 44;
+          return getRemoteAssetPromise(style);
+        case 44:
+          respContent = _context5.sent.data;
+          style = JSON.parse(respContent);
+        case 46:
           localMbtilesMatches = JSON.stringify(style).match(MBTILES_REGEXP);
           if (!(localMbtilesMatches && !tilePath)) {
-            _context5.next = 45;
+            _context5.next = 50;
             break;
           }
           _msg10 = 'Style has local mbtiles file sources, but no tilePath is set';
           throw new Error(_msg10);
-        case 45:
+        case 50:
           if (localMbtilesMatches) {
             localMbtilesMatches.forEach(function (name) {
               var mbtileFilename = _path["default"].normalize(_path["default"].format({
@@ -874,10 +896,10 @@ var render = exports.render = /*#__PURE__*/function () {
             ratio: ratio
           });
           map.load(style);
-          _context5.next = 50;
+          _context5.next = 55;
           return loadImages(map, images);
-        case 50:
-          _context5.next = 52;
+        case 55:
+          _context5.next = 57;
           return renderMap(map, {
             zoom: zoom,
             center: center,
@@ -886,10 +908,10 @@ var render = exports.render = /*#__PURE__*/function () {
             bearing: bearing,
             pitch: pitch
           });
-        case 52:
+        case 57:
           buffer = _context5.sent;
           return _context5.abrupt("return", toPNG(buffer, width, height, ratio));
-        case 54:
+        case 59:
         case "end":
           return _context5.stop();
       }
